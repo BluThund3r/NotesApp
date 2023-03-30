@@ -68,7 +68,27 @@ class Menu {
             }
 
             else {  // There is a logged in User
+                switch(command) {
+                    case 1 -> {
 
+                    }
+                    case 2 -> {
+
+                    }
+                    case 3 ->  {
+
+                    }
+                    case 4 -> {
+
+                    }
+                    case 5 -> {
+                        authService.logoutUser();
+                        System.out.println("LOGGED OUT!");
+                    }
+                    case 6 -> {
+                        runMenu = false;
+                    }
+                }
             }
 
             if(runMenu) {
@@ -252,6 +272,10 @@ final class AuthService {
             return -2;
         UserService.addUser(userName, password);
         return 0;
+    }
+
+    public void logoutUser() {
+        Menu.getInstance().setActiveUser(null);
     }
 }
 
