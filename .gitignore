@@ -1,0 +1,6 @@
+#Ignore everything from /src/
+/src/*
+
+
+#Except for these files
+!Main.java
