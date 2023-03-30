@@ -1,6 +1,3 @@
 #Ignore everything from /src/
-/src/*
-
-
-#Except for these files
-!Main.java
+/src/*.class
+/src/application/*.class
