@@ -10,10 +10,14 @@ public class User {
 
     private Trash trash;
 
+    {
+        this.folders = new Folder[0];
+        this.trash = new Trash();
+    }
+
     public User(String userName, String passwordHash) {
         this.userName = userName;
         this.passwordHash = passwordHash;
-        this.trash = new Trash();
     }
 
     public String getUserName() {
@@ -71,14 +75,23 @@ public class User {
         System.out.println((noFolders + 1) + ". " + trash.getName());
     }
 
-    // Returns the Folder at the specified position(index) in folders[] or null if the position is out of bounds
-    public Folder getFolderByPosition(int position) {
+    // Returns the Folder at the specified position(index) in folders[] or null if can't access the position in the array
+    // (null array or position out of array bounds)
+    public GenericFolder getFolderByPosition(int position) {
         try {
             return this.folders[position];
         }
         catch (ArrayIndexOutOfBoundsException e) {
+            if(position == this.folders.length)
+                return this.trash;
             return null;
         }
+    }
 
+    public Folder getFolderById(int id) {
+        for(Folder folder : folders)
+            if(folder.getId() == id)
+                return folder;
+        return null;
     }
 }

@@ -5,6 +5,7 @@ import java.util.Date;
 public abstract class GenericNote {
     private static int genId = 1;
     private int id;
+    private Folder initialFolder;
 
     public int getId() {
         return id;
@@ -28,8 +29,9 @@ public abstract class GenericNote {
         this.title = "";
     }
 
-    public GenericNote(String title) {
+    public GenericNote(String title, Folder folder) {
         this.title = title;
+        this.initialFolder = folder;
     }
 
     public String getTitle() {
@@ -48,7 +50,9 @@ public abstract class GenericNote {
         return dateModified;
     }
 
-    public void setDateModified(Date dateModified) {
-        this.dateModified = dateModified;
+    public void setDateModified() {
+        this.dateModified = new Date();
     }
+
+    public Folder getInitialFolder() { return this.initialFolder; }
 }
