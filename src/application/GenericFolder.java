@@ -62,4 +62,8 @@ public abstract class GenericFolder {
     public void clear() {
         this.notes = null;
     }
+
+    public String getName() {
+        return this.name;
+    }
 }

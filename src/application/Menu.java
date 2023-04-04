@@ -65,16 +65,51 @@ public class Menu {
             } else {  // There is a logged in User
                 switch (command) {
                     case 1 -> {
-                        // List all folders
+                        this.activeUser.showAllFolders();
                     }
                     case 2 -> {
                         // Enter a folder
                     }
                     case 3 -> {
-                        // Create a folder
+                        in.nextLine();
+                        System.out.print("New Folder Name: ");
+                        String fName = in.nextLine();
+                        if(fName.strip().equals("")) {
+                            System.out.println("Folder name must not be empty!");
+                            break;
+                        }
+
+                        activeUser.addFolder(fName);
+                        System.out.println("Folder Added Successfully!");
                     }
                     case 4 -> {
-                        // Delete a folder
+                        activeUser.showAllFolders();
+                        if(activeUser.getFolders() == null || activeUser.getFolders().length == 0) {
+                            System.out.println("No folders to delete!");
+                            break;
+                        }
+
+                        System.out.print("Number of the folder to delete: ");
+                        int delNumber = in.nextInt();
+                        if(delNumber < 0 || delNumber > activeUser.getFolders().length + 1)
+                            System.out.println("Invalid number!");
+                        else if(delNumber == activeUser.getFolders().length + 1)
+                            System.out.println("Can't delete Trash Folder!");
+                        else {
+                            System.out.print("Are you sure you want to delete this folder? (y/n): ");
+                            String option = in.next();
+                            if(option.equalsIgnoreCase("y")) {
+                                this.activeUser.deleteFolder(delNumber - 1);
+                                System.out.println("Folder deleted!");
+                            }
+
+
+                            else if(option.equalsIgnoreCase("n"))
+                                System.out.println("OK! Action Canceled!");
+
+                            else
+                                System.out.println("Invalid Option! Action Cancelled!");
+                        }
                     }
                     case 5 -> {
                         authService.logoutUser();

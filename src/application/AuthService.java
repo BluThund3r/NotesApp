@@ -2,8 +2,7 @@ package application;
 
 // Manages the authentication for user and protected notes that the user might access
 public final class AuthService {
-    public AuthService() {
-    }
+    public AuthService() {}
 
     // returns:
     // 0 on successful login
