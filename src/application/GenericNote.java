@@ -55,4 +55,14 @@ public abstract class GenericNote {
     }
 
     public Folder getInitialFolder() { return this.initialFolder; }
+
+    public abstract void showContent();
+
+    // Returns true if the read operation was successful, otherwise returns false
+    abstract public boolean readContentFromFile(String pathName);
+
+    // Returns true if the export operation was successful, otherwise returns false
+    abstract public boolean writeContentToFile(String pathName);
+
+    abstract public boolean allowDelete();
 }

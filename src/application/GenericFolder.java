@@ -6,7 +6,7 @@ public abstract class GenericFolder {
     private static int genId = 1;
     private String name;
     private int id;
-    private GenericNote[] notes;
+    private GenericNote[] items;
 
     public int getId() {
         return id;
@@ -17,7 +17,7 @@ public abstract class GenericFolder {
     }
 
     {
-        this.notes = new GenericNote[0];
+        this.items = new GenericNote[0];
     }
 
     public GenericFolder() {
@@ -32,13 +32,13 @@ public abstract class GenericFolder {
         this.name = name;
     }
 
-    public GenericNote[] getNotes() {
-        return notes;
+    public GenericNote[] getItems() {
+        return items;
     }
 
-    public GenericNote[] getNotesByTitle(String title) {
+    public GenericNote[] getItemsByTitle(String title) {
         GenericNote[] temp = null;
-        for (GenericNote note : notes)
+        for (GenericNote note : items)
             if (note.getTitle().equalsIgnoreCase(title)) {
                 if (temp == null) {
                     temp = new GenericNote[1];
@@ -52,42 +52,64 @@ public abstract class GenericFolder {
         return temp;
     }
 
-    public GenericNote getNoteById(int id) {
-        if (notes == null)
+    public GenericNote getItemById(int id) {
+        if (items == null)
             return null;
-        for (GenericNote n : notes)
+        for (GenericNote n : items)
             if (n.getId() == id)
                 return n;
         return null;
     }
 
     public void clear() {
-        this.notes = new GenericNote[0];
+        this.items = new GenericNote[0];
     }
 
     public String getName() {
         return this.name;
     }
     public void addNote(GenericNote ob) {
-        this.notes = Arrays.copyOf(this.notes, this.notes.length + 1);
-        this.notes[this.notes.length - 1] = ob;
+        this.items = Arrays.copyOf(this.items, this.items.length + 1);
+        this.items[this.items.length - 1] = ob;
     }
 
-    public GenericNote getNoteByPosition(int position) {
+    public GenericNote getItemByPosition(int position) {
         try {
-            return this.notes[position];
+            return this.items[position];
         }
         catch (ArrayIndexOutOfBoundsException e) {
             return null;
         }
     }
 
+    public Note getNoteByPosition(int position) {
+        try {
+            if(this.items[position] instanceof CheckList)
+                return null;
+            return (Note)this.items[position];
+        }
+        catch(ArrayIndexOutOfBoundsException e) {
+            return null;
+        }
+    }
+
+    public CheckList getCheckListByPosition(int position) {
+        try {
+            if(this.items[position] instanceof Note)
+                return null;
+            return (CheckList) this.items[position];
+        }
+        catch(ArrayIndexOutOfBoundsException e) {
+            return null;
+        }
+    }
+
     public void removeNoteAtPosition(int position) {
         try {
-            GenericNote test = notes[position];
-            for(int i = position; i < notes.length - 1; ++ i)
-                notes[i] = notes[i + 1];
-            notes = Arrays.copyOf(notes, notes.length - 1);
+            GenericNote test = items[position];
+            for(int i = position; i < items.length - 1; ++ i)
+                items[i] = items[i + 1];
+            items = Arrays.copyOf(items, items.length - 1);
         }
         catch(ArrayIndexOutOfBoundsException e) {
             System.out.println("Number out of bounds!");
@@ -95,12 +117,46 @@ public abstract class GenericFolder {
     }
 
     public void showAllNotes() {
-        if (this.notes.length == 0) {
+        if (this.items.length == 0) {
+            System.out.println("No Note available!");
+            return;
+        }
+        boolean printed = false;
+        for(int i = 0; i < items.length; ++ i) {
+            if(items[i] instanceof Note) {
+                printed = true;
+                System.out.println((i + 1) + ". " + items[i].getTitle());
+            }
+        }
+        if(!printed)
+            System.out.println("No Note available!");
+    }
+
+    public void showAllItems() {
+        if (this.items.length == 0) {
             System.out.println("Empty Folder!");
             return;
         }
         System.out.println("Folder Content: ");
-        for(int i = 0; i < notes.length; ++ i)
-            System.out.println((i + 1) + ". " + notes[i].getTitle());
+        for(int i = 0; i < items.length; ++ i)
+            System.out.println((i + 1) + ". " + items[i].getTitle());
     }
+
+    public void showAllChecklists() {
+        if (this.items.length == 0) {
+            System.out.println("No Checklist available!");
+            return;
+        }
+        boolean printed = false;
+        for(int i = 0; i < items.length; ++ i) {
+            if(items[i] instanceof CheckList) {
+                printed = true;
+                System.out.println((i + 1) + ". " + items[i].getTitle());
+            }
+        }
+        if(!printed)
+            System.out.println("No Checklist available!");
+    }
+
+
 }

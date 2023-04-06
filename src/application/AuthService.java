@@ -21,7 +21,7 @@ public final class AuthService {
     }
 
     // Returns true if the provided password matched the pNote password. Otherwise returns false.
-    public boolean accessProtectedNote(ProtectedGenericNote pNote, String password) {
+    public boolean canAccessProtectedNote(ProtectedItem pNote, String password) {
         return Crypto.compare(pNote.getPasswordHash(), password);
     }
 
