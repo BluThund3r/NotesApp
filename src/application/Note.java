@@ -2,11 +2,17 @@ package application;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class Note extends GenericNote {
     private String[] content;
+
+    {
+        this.content = new String[0];
+    }
 
     public Note(String title, String[] content, Folder initialFolder) {
         super(title, initialFolder);
@@ -21,7 +27,8 @@ public class Note extends GenericNote {
 
     @Override
     public void showContent() {
-        System.out.println("'" + this.getTitle() + "' Content:");
+        ScreenManipulator.clearScreen();
+        System.out.println("==================== " + this.getTitle() + " ====================");
         for(String line : content)
             System.out.println(line);
         System.out.println();
@@ -52,8 +59,14 @@ public class Note extends GenericNote {
 
     @Override
     public boolean writeContentToFile(String pathName) {
-        // not implemented yet
-        return false;
+        try(FileWriter writer = new FileWriter(pathName)) {
+            writer.write("==================== " + this.getTitle() + " ====================\n");
+           for(String line : content)
+               writer.write(line + "\n");
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
     @Override

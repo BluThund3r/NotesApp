@@ -2,6 +2,7 @@ package application;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.SQLOutput;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -28,17 +29,19 @@ public class Menu {
 
     public void run() {
         boolean runMenu = true;
+        ScreenManipulator.clearScreen();
         Scanner in = new Scanner(System.in);
         if (System.console() == null) {
             System.out.println("ERROR!\n" +
                     "You are not running this from a system terminal!\n" +
-                    "Please, run the app from a proper terminal.");
+                    "Please, run the app from a proper terminal. (Preferably cmd or powershell)");
             return;
         }
 
         while (runMenu) {
             showMainMenu();
             int command = in.nextInt();
+            ScreenManipulator.clearScreen();
             if (activeUser == null) {        // There is NO logged in User
                 switch (command) {
                     case 1 -> {
@@ -80,7 +83,6 @@ public class Menu {
                         this.activeUser.showAllFolders();
                         System.out.print("\nNumber of the folder you want to enter: ");
                         int noFolder = in.nextInt();
-                        System.out.println(noFolder);
                         GenericFolder tempFolder = activeUser.getFolderByPosition(noFolder - 1);
                         if(tempFolder == null)
                             System.out.println("Invalid number! (No folders or number out of range)");
@@ -164,8 +166,8 @@ public class Menu {
                                 System.out.println("Number provided is out of bounds");
                                 break;
                             }
-                            this.currFolder.removeNoteAtPosition(restoreNumber - 1);
-                            this.activeUser.getFolderById(restoreNote.getInitialFolder().getId()).addNote(restoreNote);
+                            this.currFolder.removeItemAtPosition(restoreNumber - 1);
+                            this.activeUser.getFolderById(restoreNote.getInitialFolder().getId()).addItem(restoreNote);
                         }
 
                         case 3 -> {
@@ -175,7 +177,7 @@ public class Menu {
                                 break;
                             System.out.print("Number of the note you want to PERMANENTLY DELETE: ");
                             int deleteNumber = in.nextInt();
-                            this.currFolder.removeNoteAtPosition(deleteNumber - 1);
+                            this.currFolder.removeItemAtPosition(deleteNumber - 1);
                         }
 
                         case 4 ->  {
@@ -200,19 +202,20 @@ public class Menu {
                 else {
                     switch(command) {
                         case 1 -> {
-                            this.currFolder.showAllNotes();
+                            this.currFolder.showAllItems();
                         }
 
                         case 2 -> {
                             // See the content of a certain note/checklist
-                            this.currFolder.showAllNotes();
+                            this.currFolder.showAllItems();
                             if(this.currFolder.getItems().length == 0) {
                                 System.out.println("Create a note/checklist first!");
                                 break;
                             }
                             System.out.print("Note/Checklist number: ");
                             int noNote = in.nextInt();
-                            GenericNote note = this.currFolder.getItemByPosition(noNote);
+                            ScreenManipulator.clearScreen();
+                            GenericNote note = this.currFolder.getItemByPosition(noNote - 1);
                             if(note == null) {
                                 System.out.println("Invalid number! (out of range)");
                                 break;
@@ -225,8 +228,8 @@ public class Menu {
                             System.out.print("Note title: ");
                             in.nextLine();
                             String noteTitle = in.nextLine();
-                            System.out.println("Type of note (p/n): ");
-                            String noteType = in.next();
+                            System.out.print("Type of note (p for protected / n for normal): ");
+                            String noteType = in.nextLine();
                             System.out.print("Type the pathname to the file: ");
                             String pathname = in.nextLine();
                             GenericNote note = null;
@@ -235,12 +238,17 @@ public class Menu {
                                 String password = ScreenManipulator.readPassword();
                                 note = new ProtectedNote(noteTitle, (Folder)this.currFolder, password);
                             }
-                            else
+                            else if (noteType.equalsIgnoreCase("n"))
                                 note = new Note(noteTitle, (Folder)this.currFolder);
+
+                            else {
+                                System.out.println("Invalid option!");
+                                break;
+                            }
 
                             boolean resultStatus = note.readContentFromFile(pathname);
                             if(resultStatus) {
-                                this.currFolder.addNote(note);
+                                this.currFolder.addItem(note);
                                 System.out.println("Note imported successfully!");
                             }
                             else
@@ -249,6 +257,8 @@ public class Menu {
                         case 4 ->  {
                             // Export note to file
                             this.currFolder.showAllNotes();
+                            if(!this.currFolder.anyNote())
+                                break;
                             System.out.print("Note to export: ");
                             int exportNo = in.nextInt();
                             Note note = this.currFolder.getNoteByPosition(exportNo - 1);
@@ -256,16 +266,28 @@ public class Menu {
                                 System.out.println("Invalid number! (out of bounds or specified number is not a Note)");
                                 break;
                             }
-                            System.out.print("File to export to");
-                            // TODO: not done yet
+                            // If the note is protected and the Authentication is not successful
+                            if(note instanceof ProtectedNote && !((ProtectedNote) note).itemAuthSuccessful()) {
+                                System.out.println("Access denied!");
+                                break;
+                            }
+
+                            System.out.print("File to export to: ");
+                            in.nextLine();
+                            String filePath = in.nextLine();
+                            if (!note.writeContentToFile(filePath))
+                                System.out.println("File opening error!");
+                            else {
+                                System.out.println("Note exported successfully to file " + filePath);
+                            }
                         }
                         case 5 ->  {
                             // Import Checklist from file
                             System.out.print("Checklist title: ");
                             in.nextLine();
                             String noteTitle = in.nextLine();
-                            System.out.println("Type of checklist (p/n): ");
-                            String noteType = in.next();
+                            System.out.print("Type of checklist (p for protected / n for normal): ");
+                            String noteType = in.nextLine();
                             System.out.print("Type the pathname to the file: ");
                             String pathname = in.nextLine();
                             GenericNote cl = null;
@@ -274,12 +296,16 @@ public class Menu {
                                 String password = ScreenManipulator.readPassword();
                                 cl = new ProtectedCheckList(noteTitle, (Folder)this.currFolder, password);
                             }
-                            else
+                            else if(noteType.equalsIgnoreCase("n"))
                                 cl = new CheckList(noteTitle, (Folder)this.currFolder);
+                            else {
+                                System.out.println("Invalid option!");
+                                break;
+                            }
 
                             boolean resultStatus = cl.readContentFromFile(pathname);
                             if(resultStatus) {
-                                this.currFolder.addNote(cl);
+                                this.currFolder.addItem(cl);
                                 System.out.println("Checklist imported successfully!");
                             }
                             else
@@ -287,33 +313,183 @@ public class Menu {
                         }
                         case 6 ->  {
                             // Export checklist to file
+                            this.currFolder.showAllChecklists();
+                            if(!this.currFolder.anyCheckList())
+                                break;
+                            System.out.print("Checklist to export: ");
+                            int exportNo = in.nextInt();
+                            CheckList cl = this.currFolder.getCheckListByPosition(exportNo - 1);
+                            if(cl == null) {
+                                System.out.println("Invalid number! (out of bounds or specified number is not a Checklist)");
+                                break;
+                            }
+                            // If the checklist is protected and the Authentication is not successful
+                            if(cl instanceof ProtectedCheckList && !((ProtectedCheckList) cl).itemAuthSuccessful())
+                                break;
+                            System.out.print("File to export to: ");
+                            in.nextLine();
+                            String filePath = in.nextLine();
+                            if (!cl.writeContentToFile(filePath))
+                                System.out.println("File opening error!");
+                            else {
+                                System.out.println("Checklist exported successfully to file " + filePath);
+                            }
                         }
                         case 7 ->  {
                             // Create new note from terminal
+                            System.out.println("=============== CREATE A NOTE ===============");
+                            System.out.println("Instructions:");
+                            System.out.println("- Write each line of your note on a line in the terminal");
+                            System.out.println("- If you want to cancel the note just type ::cancel:: (non case sensitive) on a new line");
+                            System.out.println("- If you are done and want to save the note just type ::end:: (non case sensitive) on a new line");
+                            System.out.println("=============================================");
+                            in.nextLine();
+                            System.out.print("Note Title: ");
+                            String noteTitle = in.nextLine();
+                            if(noteTitle.equals(""))
+                                noteTitle = "Untitled Note";
+                            System.out.print("Type of note (p for protected / n for normal): ");
+                            String noteType = in.next();
+                            String password = null;
+                            if(noteType.equalsIgnoreCase("p")) {
+                                System.out.print("Password: ");
+                                password = ScreenManipulator.readPassword();
+                            }
+                            else if(!noteType.equalsIgnoreCase("n")) {
+                                ScreenManipulator.clearScreen();
+                                System.out.println("Invalid option!");
+                                break;
+                            }
+
+                            System.out.println("---------------------------------------------");
+                            String[] noteContent = null;
+                            in.nextLine();
+                            while(true) {
+                                String line = in.nextLine();
+                                if(line.equalsIgnoreCase("::cancel::")) {
+                                    ScreenManipulator.clearScreen();
+                                    System.out.println("Action Cancelled!");
+                                    break;
+                                }
+
+                                if(line.equalsIgnoreCase("::end::")) {
+                                    ScreenManipulator.clearScreen();
+                                    if(noteContent == null)
+                                        System.out.println("Empty note was not saved!");
+
+                                    else {
+                                        GenericNote noteToAdd = null;
+                                        if(password != null)
+                                            noteToAdd = new ProtectedNote(noteTitle, noteContent, (Folder)this.currFolder, password);
+                                        else
+                                            noteToAdd = new Note(noteTitle, noteContent, (Folder)this.currFolder);
+                                        this.currFolder.addItem(noteToAdd);
+                                        System.out.println("Note saved!");
+                                    }
+                                    break;
+                                }
+
+                                if(noteContent == null || !line.strip().equals(""))
+                                    noteContent = new String[0];
+
+
+                                if(noteContent != null) {
+                                    noteContent = Arrays.copyOf(noteContent, noteContent.length + 1);
+                                    noteContent[noteContent.length - 1] = line;
+                                }
+                            }
+
                         }
                         case 8 ->  {
                             // Create new checklist from terminal
+                            System.out.println("=============== CREATE A NOTE ===============");
+                            System.out.println("Instructions:");
+                            System.out.println("- Write each element of your checklist on a line in the terminal");
+                            System.out.println("- If you want to cancel the checklist just type ::cancel:: (non case sensitive) on a new line");
+                            System.out.println("- If you are done and want to save the checklist just type ::end:: (non case sensitive) on a new line");
+                            System.out.println("=============================================");
+                            in.nextLine();
+                            System.out.print("Checklist Title: ");
+                            String noteTitle = in.nextLine();
+                            if(noteTitle.equals(""))
+                                noteTitle = "Untitled Checklist";
+                            System.out.print("Type of note (p for protected / n for normal): ");
+                            String noteType = in.nextLine();
+                            String password = null;
+                            if(noteType.equalsIgnoreCase("p")){
+                                System.out.print("Password: ");
+                                password = ScreenManipulator.readPassword();
+                            }
+
+                            else if(!noteType.equalsIgnoreCase("n")) {
+                                ScreenManipulator.clearScreen();
+                                System.out.println("Invalid option!");
+                                break;
+                            }
+
+                            System.out.println("---------------------------------------------");
+                            String[] noteContent = null;
+                            while(true) {
+                                String line = in.nextLine();
+                                if(line.equalsIgnoreCase("::cancel::")) {
+                                    ScreenManipulator.clearScreen();
+                                    System.out.println("Action Cancelled!");
+                                    break;
+                                }
+
+                                if(line.equalsIgnoreCase("::end::")) {
+                                    ScreenManipulator.clearScreen();
+                                    if(noteContent == null)
+                                        System.out.println("Empty checklist was not saved!");
+
+                                    else {
+                                        GenericNote noteToAdd = null;
+                                        if(password != null)
+                                            noteToAdd = new ProtectedCheckList(noteTitle, noteContent, (Folder)this.currFolder, password);
+                                        else
+                                            noteToAdd = new CheckList(noteTitle, noteContent, (Folder)this.currFolder);
+                                        this.currFolder.addItem(noteToAdd);
+                                        System.out.println("Checklist saved!");
+                                    }
+                                    break;
+                                }
+
+                                if(noteContent == null) {
+                                    noteContent = new String[0];
+                                }
+                                noteContent = Arrays.copyOf(noteContent, noteContent.length + 1);
+                                noteContent[noteContent.length - 1] = line;
+                            }
                         }
                         case 9 ->  {
                             // Delete note/checklist (add to Trash) - From there you have to delete them permanently
                             this.currFolder.showAllItems();
                             System.out.print("Item to move to trash: ");
                             int noItem = in.nextInt();
-                            GenericNote note = this.currFolder.getNoteByPosition(noItem - 1);
+                            GenericNote note = this.currFolder.getItemByPosition(noItem - 1);
                             if(note == null) {
                                 System.out.println("Invalid number! (out of range)");
                                 break;
                             }
                             if(note.allowDelete()) {
-                                this.activeUser.getTrash().addNote(note);
-                                this.currFolder.removeNoteAtPosition(noItem - 1);
+                                this.activeUser.getTrash().addItem(note);
+                                this.currFolder.removeItemAtPosition(noItem - 1);
                                 System.out.println("Item moved to trash!");
                             }
                             else
                                 System.out.println("Access denied!");
                         }
                         case 10 ->  {
-                            // Modify a checklist
+                            // Check/uncheck items in a checklist
+                            this.currFolder.showAllChecklists();
+                            System.out.print("Checklist to edit: ");
+                            int noChecklist = in.nextInt();
+                            CheckList checkList = this.currFolder.getCheckListByPosition(noChecklist - 1);
+                            if(checkList == null) {
+                                System.out.println("Invalid number!");
+                                break;
+                            }
+                            checkList.toggleElements();
                         }
                         case 11 ->  {
                             this.currFolder = null;
@@ -324,8 +500,7 @@ public class Menu {
                         default -> {
                             System.out.println("Invalid Option!");
                         }
-                }
-
+                    }
                 }
             }
 
@@ -365,7 +540,7 @@ public class Menu {
             }
             else {
                 System.out.println("------------------- Folder '" + this.currFolder.getName() + "' Actions Menu ------------------- ");
-                System.out.println("1. See al notes in the folder");
+                System.out.println("1. See all notes in the folder");
                 System.out.println("2. See the content of a certain note/checklist");
                 System.out.println("3. Import note from file");
                 System.out.println("4. Export note to file");
@@ -373,8 +548,8 @@ public class Menu {
                 System.out.println("6. Export checklist to file");
                 System.out.println("7. Create new note from terminal");
                 System.out.println("8. Create new checklist from terminal");
-                System.out.println("9. Delete note/checklist");
-                System.out.println("10. Modify a checklist");
+                System.out.println("9. Move note/checklist to trash");
+                System.out.println("10. Check/uncheck items in a checklist");
                 System.out.println("11. Back to folders");
                 System.out.println("12. Exit");
             }

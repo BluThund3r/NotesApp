@@ -1,5 +1,7 @@
 package application;
 
+import java.io.IOException;
+
 final public class ScreenManipulator {
     private ScreenManipulator() {}
 
@@ -9,8 +11,13 @@ final public class ScreenManipulator {
     }
 
     public static void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (InterruptedException e) {
+            System.out.println("Runtime Exception during screen clearing");
+        } catch (IOException e) {
+            System.out.println("IO Exception during screen clearing");
+        }
     }
 
     public static void pressEnterToContinue() {

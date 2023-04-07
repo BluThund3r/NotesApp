@@ -40,6 +40,7 @@ public class ProtectedNote extends Note implements ProtectedItem {
     public void showContent() {
         if(itemAuthSuccessful())
             super.showContent();
+
         else
             System.out.println("Access denied!");
     }

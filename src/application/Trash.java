@@ -7,7 +7,7 @@ public class Trash extends GenericFolder {
     }
 
     public boolean isEmpty() {
-        return this.getNotes() == null || this.getNotes().length == 0;
+        return this.getItems() == null || this.getItems().length == 0;
     }
 
     public void emptyTrash() {

@@ -68,7 +68,7 @@ public abstract class GenericFolder {
     public String getName() {
         return this.name;
     }
-    public void addNote(GenericNote ob) {
+    public void addItem(GenericNote ob) {
         this.items = Arrays.copyOf(this.items, this.items.length + 1);
         this.items[this.items.length - 1] = ob;
     }
@@ -104,7 +104,7 @@ public abstract class GenericFolder {
         }
     }
 
-    public void removeNoteAtPosition(int position) {
+    public void removeItemAtPosition(int position) {
         try {
             GenericNote test = items[position];
             for(int i = position; i < items.length - 1; ++ i)
@@ -118,18 +118,20 @@ public abstract class GenericFolder {
 
     public void showAllNotes() {
         if (this.items.length == 0) {
-            System.out.println("No Note available!");
+            System.out.println("No available Notes!");
             return;
         }
         boolean printed = false;
         for(int i = 0; i < items.length; ++ i) {
             if(items[i] instanceof Note) {
+                if(!printed)
+                    System.out.println("Folder Notes: ");
                 printed = true;
                 System.out.println((i + 1) + ". " + items[i].getTitle());
             }
         }
         if(!printed)
-            System.out.println("No Note available!");
+            System.out.println("No available Notes!");
     }
 
     public void showAllItems() {
@@ -139,24 +141,38 @@ public abstract class GenericFolder {
         }
         System.out.println("Folder Content: ");
         for(int i = 0; i < items.length; ++ i)
-            System.out.println((i + 1) + ". " + items[i].getTitle());
+            System.out.println((i + 1) + ". " + items[i].getTitle() + ((items[i] instanceof Note)? "    (Note)" : "    (Checklist)"));
     }
 
     public void showAllChecklists() {
         if (this.items.length == 0) {
-            System.out.println("No Checklist available!");
+            System.out.println("No available Checklists!");
             return;
         }
         boolean printed = false;
         for(int i = 0; i < items.length; ++ i) {
             if(items[i] instanceof CheckList) {
+                if(!printed)
+                    System.out.println("Folder Checklists: ");
                 printed = true;
                 System.out.println((i + 1) + ". " + items[i].getTitle());
             }
         }
         if(!printed)
-            System.out.println("No Checklist available!");
+            System.out.println("No available Checklists!");
     }
 
+    public boolean anyCheckList() {
+        for(GenericNote elem : items)
+            if(elem instanceof CheckList)
+                return true;
+        return false;
+    }
 
+    public boolean anyNote() {
+        for(GenericNote elem : items)
+            if(elem instanceof Note)
+                return true;
+        return false;
+    }
 }

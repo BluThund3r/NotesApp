@@ -40,6 +40,8 @@ public class ProtectedCheckList extends CheckList implements ProtectedItem {
     public void showContent() {
         if(itemAuthSuccessful())
             super.showContent();
+
+
         else
             System.out.println("Access denied!");
     }
@@ -47,5 +49,13 @@ public class ProtectedCheckList extends CheckList implements ProtectedItem {
     @Override
     public boolean allowDelete() {
         return itemAuthSuccessful();
+    }
+
+    @Override
+    public void toggleElements() {
+        if(this.itemAuthSuccessful())
+            super.toggleElements();
+        else
+            System.out.println("Permision denied!");
     }
 }
