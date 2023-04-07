@@ -19,6 +19,7 @@ public class ProtectedNote extends Note implements ProtectedItem {
 
     @Override
     public boolean itemAuthSuccessful() {
+        ScreenManipulator.clearScreen();
         AuthService authService = new AuthService();
         int tries = 3;
         System.out.println("Protected by password!");
@@ -27,6 +28,7 @@ public class ProtectedNote extends Note implements ProtectedItem {
             System.out.print("Note Password: ");
 
             String password = ScreenManipulator.readPassword();
+            ScreenManipulator.clearScreen();
             if (authService.canAccessProtectedNote(this, password)) {
                 return true;
             }

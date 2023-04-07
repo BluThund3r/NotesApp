@@ -70,6 +70,7 @@ public class Menu {
                         runMenu = false;
                     }
                     default -> {
+                        ScreenManipulator.clearScreen();
                         System.out.println("Invalid Option!");
                     }
                 }
@@ -85,7 +86,7 @@ public class Menu {
                         int noFolder = in.nextInt();
                         GenericFolder tempFolder = activeUser.getFolderByPosition(noFolder - 1);
                         if(tempFolder == null)
-                            System.out.println("Invalid number! (No folders or number out of range)");
+                            System.out.println("\nInvalid number! (No folders or number out of range)");
 
                         else
                             this.currFolder = tempFolder;
@@ -100,7 +101,7 @@ public class Menu {
                         }
 
                         activeUser.addFolder(fName);
-                        System.out.println("Folder Added Successfully!");
+                        System.out.println("\nFolder Added Successfully!");
                     }
                     case 4 -> {
                         activeUser.showAllFolders();
@@ -142,6 +143,7 @@ public class Menu {
                         runMenu = false;
                     }
                     default -> {
+                        ScreenManipulator.clearScreen();
                         System.out.println("Invalid Option!");
                     }
                 }
@@ -151,19 +153,19 @@ public class Menu {
                 if(currFolder instanceof Trash) {
                     switch(command) {
                         case 1 -> {
-                            this.currFolder.showAllNotes();
+                            this.currFolder.showAllItems();
                         }
 
                         case 2 -> {
                             // Restore a note/checklist
-                            this.currFolder.showAllNotes();
+                            this.currFolder.showAllItems();
                             if(this.currFolder.getItems().length == 0)
                                 break;
-                            System.out.print("Number of the note you want to restore: ");
+                            System.out.print("\nNumber of the note you want to restore: ");
                             int restoreNumber = in.nextInt();
                             GenericNote restoreNote = this.currFolder.getItemByPosition(restoreNumber - 1);
                             if(restoreNote == null) {
-                                System.out.println("Number provided is out of bounds");
+                                System.out.println("\nNumber provided is out of bounds!");
                                 break;
                             }
                             this.currFolder.removeItemAtPosition(restoreNumber - 1);
@@ -172,10 +174,10 @@ public class Menu {
 
                         case 3 -> {
                             // Permanently delete a note/checklist
-                            this.currFolder.showAllNotes();
+                            this.currFolder.showAllItems();
                             if(this.currFolder.getItems().length == 0)
                                 break;
-                            System.out.print("Number of the note you want to PERMANENTLY DELETE: ");
+                            System.out.print("\nNumber of the note you want to PERMANENTLY DELETE: ");
                             int deleteNumber = in.nextInt();
                             this.currFolder.removeItemAtPosition(deleteNumber - 1);
                         }
@@ -194,6 +196,7 @@ public class Menu {
                             runMenu = false;
                         }
                         default -> {
+                            ScreenManipulator.clearScreen();
                             System.out.println("Invalid Option!");
                         }
                     }
@@ -242,33 +245,33 @@ public class Menu {
                                 note = new Note(noteTitle, (Folder)this.currFolder);
 
                             else {
-                                System.out.println("Invalid option!");
+                                System.out.println("\nInvalid option!");
                                 break;
                             }
 
                             boolean resultStatus = note.readContentFromFile(pathname);
                             if(resultStatus) {
                                 this.currFolder.addItem(note);
-                                System.out.println("Note imported successfully!");
+                                System.out.println("\nNote imported successfully!");
                             }
                             else
-                                System.out.println("Action interrupted!\nCould not open file!");
+                                System.out.println("\nAction interrupted!\nCould not open file!");
                         }
                         case 4 ->  {
                             // Export note to file
                             this.currFolder.showAllNotes();
                             if(!this.currFolder.anyNote())
                                 break;
-                            System.out.print("Note to export: ");
+                            System.out.print("\nNote to export: ");
                             int exportNo = in.nextInt();
                             Note note = this.currFolder.getNoteByPosition(exportNo - 1);
                             if(note == null) {
-                                System.out.println("Invalid number! (out of bounds or specified number is not a Note)");
+                                System.out.println("\nInvalid number! (out of bounds or specified number is not a Note)");
                                 break;
                             }
                             // If the note is protected and the Authentication is not successful
                             if(note instanceof ProtectedNote && !((ProtectedNote) note).itemAuthSuccessful()) {
-                                System.out.println("Access denied!");
+                                System.out.println("\nAccess denied!");
                                 break;
                             }
 
@@ -276,9 +279,9 @@ public class Menu {
                             in.nextLine();
                             String filePath = in.nextLine();
                             if (!note.writeContentToFile(filePath))
-                                System.out.println("File opening error!");
+                                System.out.println("\nFile opening error!");
                             else {
-                                System.out.println("Note exported successfully to file " + filePath);
+                                System.out.println("\nNote exported successfully to file " + filePath);
                             }
                         }
                         case 5 ->  {
@@ -299,28 +302,28 @@ public class Menu {
                             else if(noteType.equalsIgnoreCase("n"))
                                 cl = new CheckList(noteTitle, (Folder)this.currFolder);
                             else {
-                                System.out.println("Invalid option!");
+                                System.out.println("\nInvalid option!");
                                 break;
                             }
 
                             boolean resultStatus = cl.readContentFromFile(pathname);
                             if(resultStatus) {
                                 this.currFolder.addItem(cl);
-                                System.out.println("Checklist imported successfully!");
+                                System.out.println("\nChecklist imported successfully!");
                             }
                             else
-                                System.out.println("Action interrupted!\nCould not open file!");
+                                System.out.println("\nAction interrupted!\nCould not open file!");
                         }
                         case 6 ->  {
                             // Export checklist to file
                             this.currFolder.showAllChecklists();
                             if(!this.currFolder.anyCheckList())
                                 break;
-                            System.out.print("Checklist to export: ");
+                            System.out.print("\nChecklist to export: ");
                             int exportNo = in.nextInt();
                             CheckList cl = this.currFolder.getCheckListByPosition(exportNo - 1);
                             if(cl == null) {
-                                System.out.println("Invalid number! (out of bounds or specified number is not a Checklist)");
+                                System.out.println("\nInvalid number! (out of bounds or specified number is not a Checklist)");
                                 break;
                             }
                             // If the checklist is protected and the Authentication is not successful
@@ -330,9 +333,9 @@ public class Menu {
                             in.nextLine();
                             String filePath = in.nextLine();
                             if (!cl.writeContentToFile(filePath))
-                                System.out.println("File opening error!");
+                                System.out.println("\nFile opening error!");
                             else {
-                                System.out.println("Checklist exported successfully to file " + filePath);
+                                System.out.println("\nChecklist exported successfully to file " + filePath);
                             }
                         }
                         case 7 ->  {
@@ -468,27 +471,29 @@ public class Menu {
                             int noItem = in.nextInt();
                             GenericNote note = this.currFolder.getItemByPosition(noItem - 1);
                             if(note == null) {
-                                System.out.println("Invalid number! (out of range)");
+                                System.out.println("\nInvalid number! (out of range)");
                                 break;
                             }
+                            ScreenManipulator.clearScreen();
                             if(note.allowDelete()) {
                                 this.activeUser.getTrash().addItem(note);
                                 this.currFolder.removeItemAtPosition(noItem - 1);
-                                System.out.println("Item moved to trash!");
+                                System.out.println("\nItem moved to trash!");
                             }
                             else
-                                System.out.println("Access denied!");
+                                System.out.println("\nAccess denied!");
                         }
                         case 10 ->  {
                             // Check/uncheck items in a checklist
                             this.currFolder.showAllChecklists();
-                            System.out.print("Checklist to edit: ");
+                            System.out.print("\nChecklist to edit: ");
                             int noChecklist = in.nextInt();
                             CheckList checkList = this.currFolder.getCheckListByPosition(noChecklist - 1);
                             if(checkList == null) {
-                                System.out.println("Invalid number!");
+                                System.out.println("\nInvalid number!");
                                 break;
                             }
+                            ScreenManipulator.clearScreen();
                             checkList.toggleElements();
                         }
                         case 11 ->  {
@@ -498,6 +503,7 @@ public class Menu {
                             runMenu = false;
                         }
                         default -> {
+                            ScreenManipulator.clearScreen();
                             System.out.println("Invalid Option!");
                         }
                     }
@@ -555,7 +561,7 @@ public class Menu {
             }
 
         }
-        System.out.print("Type the number associated with the desired action: ");
+        System.out.print("\nType the number associated with the desired action: ");
     }
 
     private void showRegisterResult(int registerResult) {
